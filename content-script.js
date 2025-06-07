@@ -99,7 +99,7 @@ document.addEventListener("keydown", event => {
                 console.log("Error occured while processing input")
             }
         });
-    } else if (pressed_keys["Control"]) {
+    } else if (event.ctrlKey) {
         try {
             var port = chrome.runtime.connect({ name: "tabs" });
         } catch (err) {
