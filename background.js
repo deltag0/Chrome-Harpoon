@@ -1,9 +1,3 @@
-/*
-    *
-    * TODO: Add a way to go back between last tab like in neovim
-    */
-
-
 const TabState = {
     pinnedPages: Array(10).fill(-1),
     pinnedPagesLen: 0,
@@ -42,6 +36,7 @@ const JumpList = {
     /*
     * Acts as a deque, but js doesn't have a built in structure for that.
     * That's really interesting... Fine though, because we only have 100 elements.
+    * Array of pairs {tabId, windowId}
     */
     list: [],
 
@@ -94,6 +89,8 @@ function setActive(tabId, windowId) {
     *
     * If the JumpList is full, AND the currIdx is at the end of the list the first element 
     * is popped to make space, the tabId is added, and currIdx incremented.
+    *
+    * NOTE: storage syncing is handled by handleTabCommands
     */
 function addToJumpList(tabId, windowId) {
     if (JumpList.size === JumpList.maxSize && JumpList.currIdx === JumpList.maxSize - 1) {
@@ -114,6 +111,13 @@ function addToJumpList(tabId, windowId) {
 }
 
 
+/*
+    * moveBackJumpList - Move back in the jump list and change active tab
+    *
+    * If not at the start, switch the active tab to the previously selected
+    *
+    * NOTE: storage syncing is handled by handleTabCommands
+    */
 function moveBackJumpList() {
     blockNextTab = true;
     console.log("Moving back", JumpList.currIdx, JumpList.list);
@@ -125,6 +129,14 @@ function moveBackJumpList() {
     }
 }
 
+
+/*
+    * moveForwardJumpList - Move forward in the jump list and change active tab
+    * 
+    * If not at the end, switch the active tab to the previously selected
+    * 
+    * NOTE: storage syncing is handled by handleTabCommands
+    */
 function moveForwardJumpList() {
     blockNextTab = true;
     console.log("Removed changedTab?", !chrome.tabs.onActivated.hasListener(changedTab));
@@ -138,7 +150,19 @@ function moveForwardJumpList() {
 }
 
 
+/*
+    * addToPinned - If the tabId isn't already pinned, add it to the first available slot
+    * @tabId - tab id
+    *   int
+    *
+    * Add a tabId to the pinnedPages.
+    *
+    * NOTE: storage syncing is handled by handleTabCommands
+    */
 function addToPinned(tabId) {
+    if (TabState.pinnedPages.includes(tabId)) {
+        return;
+    }
     console.log(TabState.pinnedPages);
     for (let i = 0; i < TabState.pinnedPages.length; i++) {
         if (TabState.pinnedPages[i] === -1) {
@@ -157,6 +181,8 @@ function addToPinned(tabId) {
     *
     * Given an idx, set the the tab TabState.pinnedPages[idx] active. If the tab is on a different
     * window, fullscreen the window to display that tab.
+    *
+    * NOTE: storage syncing is handled by handleTabCommands
     */
 async function swapTab(idx) {
     if (idx === 0 && TabState.pinnedPages.length === 10) {
@@ -276,6 +302,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
 /*
+    * @ tabId - tabId
+    *   int
     * Function to remove tab from TabState.pinnedPages after it was deleted
     */
 chrome.tabs.onRemoved.addListener(async tabId => {
@@ -301,9 +329,13 @@ chrome.tabs.onRemoved.addListener(async tabId => {
 
 
 /*
+    * changedTab - Detect if we changed a tab on chrome
+    * @activeInfo: See tabs.onActivated documentation for activeInfo
+    *
     * Add tab to jump list when user switches tabs.
     * This listener should be disabled, however, when the keybinds
     * for moving backwards/forward in the jumplist.
+    *
     */
 async function changedTab(activeInfo) {
     if (blockNextTab) {

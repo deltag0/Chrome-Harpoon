@@ -87,7 +87,7 @@ document.addEventListener("keydown", event => {
             sendRequest("add", port);
         } else {
             for (let i = 0; i < 10; i++) {
-                if (event.key === i) {
+                if (pressed_keys[i]) {
                     sendRequest(i, port);
                     pressed_keys[i] = false;
                     break;
