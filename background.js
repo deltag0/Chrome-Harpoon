@@ -71,7 +71,7 @@ const JumpList = {
 
 
 function setActive(tabId, windowId) {
-    chrome.windows.update(windowId, { focused: true, state: 'maximized' }, (window) => {
+    chrome.windows.update(windowId, { focused: true }, (window) => {
         chrome.tabs.update(tabId, { active: true })
     });
 }
