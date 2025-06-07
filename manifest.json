@@ -1,0 +1,20 @@
+{
+	"name": "Web Harpoon",
+  "description": "Pin pages using commands and easily jump to them with keyboard commands only!",
+	"version": "1.0",
+	"manifest_version": 3,
+	"action": {
+		"default_title": "Click",
+		"default_popup": "popup.html"
+	},
+"permissions": ["storage", "activeTab", "scripting", "tabs"],
+	"background": {
+		"service_worker": "background.js"
+	},
+  "content_scripts": [
+	  {
+		  "js": ["content-script.js"],
+		  "matches": ["<all_urls>"]
+	  }
+  ]
+}

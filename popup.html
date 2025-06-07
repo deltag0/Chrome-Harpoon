@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Pinned Tabs</title>
+    <style>
+        /* Minimalist table styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            min-width: 250px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 4px 6px;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        th {
+            border-bottom: 1px solid #ccc;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .empty {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Pinned Tabs</h3>
+    <table id="pinnedTable">
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be injected here by popup.js -->
+        </tbody>
+    </table>
+    <script src="popup.js"></script>
+</body>
+
+</html>
