@@ -19,6 +19,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const row = document.createElement("tr");
 
+            row.draggable = true;
+            row.addEventListener('dragstart', () => {
+                dragSrcIndex = i;
+            });
+            row.addEventListener('dragover', e => {
+                e.preventDefault();
+            });
+            row.addEventListener('drop', () => {
+                if (dragSrcIndex === null || dragSrcIndex === i) return;
+                // swap DOM
+                const rows = Array.from(tbody.children);
+                const src = rows[dragSrcIndex];
+                const dst = rows[i];
+                tbody.insertBefore(src, dragSrcIndex < i ? dst.nextSibling : dst);
+                // swap data
+                [pinnedPages[dragSrcIndex], pinnedPages[i]] =
+                    [pinnedPages[i], pinnedPages[dragSrcIndex]];
+                chrome.runtime.sendMessage({
+                    type: 'REORDER_PINNED_PAGES',
+                    newOrder: pinnedPages
+                });
+                location.reload();
+            });
+
             const keyCell = document.createElement("td");
             keyCell.textContent = keyLabel;
             row.appendChild(keyCell);

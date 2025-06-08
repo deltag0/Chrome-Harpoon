@@ -115,6 +115,7 @@ function setActive(tabId, windowId) {
     * If the JumpList is full, AND the currIdx is at the end of the list the first element 
     * is popped to make space, the tabId is added, and currIdx incremented.
     *
+    * NOTE: modifies JumpList
     */
 function addToJumpList(tabId, windowId) {
     if (JumpList.size === JumpList.maxSize && JumpList.currIdx === JumpList.maxSize - 1) {
@@ -140,6 +141,7 @@ function addToJumpList(tabId, windowId) {
     *
     * If not at the start, switch the active tab to the previously selected
     *
+    * NOTE: modifies JumpList
     */
 function moveBackJumpList() {
     blockNextTab = true;
@@ -158,6 +160,7 @@ function moveBackJumpList() {
     * 
     * If not at the end, switch the active tab to the previously selected
     * 
+    * NOTE: modifies JumpList
     */
 function moveForwardJumpList() {
     blockNextTab = true;
@@ -179,6 +182,7 @@ function moveForwardJumpList() {
     *
     * Add a tabId to the pinnedPages.
     *
+    * NOTE: modifies TabState
     */
 function addToPinned(tabId) {
     if (TabState.pinnedPages.includes(tabId)) {
@@ -322,7 +326,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.type === "GET_PINNED_PAGES") {
         sendResponse({ pinnedPages: TabState.pinnedPages });
-    } else if (request.type == "REMOVE_PINNED_PAGE") {
+    } else if (request.type === "REMOVE_PINNED_PAGE") {
         var idx = request.index;
         var tabId = TabState.pinnedPages[idx]
         await TabState.modifyTabState(removeFromPinnedPages, tabId);
@@ -332,14 +336,33 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                 "128": "./assets/icon_unactivated.png",
             }
         });
+    } else if (request.type === 'REORDER_PINNED_PAGES') {
+        await TabState.modifyTabState(reorderPinnedPages, request.newOrder);
     }
 });
 
 
 /*
+    * reorderPinnedPages - copy order from newPinnedPages into TabState
+    * @newPinnedPages: Array containing tab ids
+    *   {array}
+    *
+    * NOTE: modifies TabState
+    */
+function reorderPinnedPages(newPinnedPages) {
+    newPinnedPages.forEach((tabId, i) => {
+        TabState.pinnedPages[i] = tabId;
+    });
+}
+
+
+/*
+    * removeFromPinnedPages - remove tabId from TabState
     * @ tabId - tabId
     *   {int}
     * Function to remove tab from TabState.pinnedPages after it was deleted
+    *
+    * NOTE: modifies TabState
     */
 function removeFromPinnedPages(tabId) {
     for (let i = 0; i < TabState.pinnedPages.length; i++) {
@@ -426,11 +449,11 @@ function reinjectContentScriptsToAllTabs() {
     * When an extension is reset, call the reset procedure.
     */
 chrome.runtime.onInstalled.addListener(details => {
-    // if (details === chrome.runtime.OnInstalledReason.INSTALL) {
-    chrome.tabs.create({
-        url: chrome.runtime.getURL("./installation//install.html")
-    });
-    // }
+    if (details === chrome.runtime.OnInstalledReason.INSTALL) {
+        chrome.tabs.create({
+            url: chrome.runtime.getURL("./installation//install.html")
+        });
+    }
     JumpList.reset();
     TabState.reset();
     reinjectContentScriptsToAllTabs();

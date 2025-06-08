@@ -61,11 +61,6 @@ setInterval(sendDummyMessage, 29000);
     *       "o": go to previous tab in jump list
     */
 document.addEventListener("keydown", event => {
-    if (event.key === " " && event.target === document.body) {
-        event.preventDefault();
-    }
-
-
     const active = document.activeElement;
     if (
         active.tagName === "INPUT" ||
@@ -78,17 +73,17 @@ document.addEventListener("keydown", event => {
     pressed_keys[event.key] = true;
     console.log(pressed_keys);
 
-    if (pressed_keys[leader] || event.altKey) {
+    if (event.altKey) {
         try {
             var port = chrome.runtime.connect({ name: "tabs" });
         } catch (err) {
             return;
         }
-        if (event.key === "a") {
+        if (pressed_keys["a"]) {
             sendRequest("add", port);
         } else {
             for (let i = 0; i < 10; i++) {
-                if (pressed_keys[i]) {
+                if (pressed_keys[i.toString()]) {
                     sendRequest(i, port);
                     pressed_keys[i] = false;
                     break;
@@ -100,7 +95,7 @@ document.addEventListener("keydown", event => {
                 console.log("Error occured while processing input")
             }
         });
-    } if (event.ctrlKey || event.altKey) {
+    } if (event.altKey) {
         try {
             var port = chrome.runtime.connect({ name: "tabs" });
         } catch (err) {
@@ -109,6 +104,7 @@ document.addEventListener("keydown", event => {
         if (pressed_keys["z"]) {
             sendRequest("back", port);
             pressed_keys['z'] = false;
+            event.altKey = false;
             return;
         } else if (pressed_keys["y"]) {
             sendRequest("front", port);
