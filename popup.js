@@ -5,7 +5,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.getElementById("pinnedTable").querySelector("tbody");
 
-    // Ask background for pinnedPages
     chrome.runtime.sendMessage({ type: "GET_PINNED_PAGES" }, (response) => {
         if (!response || !response.pinnedPages) {
             console.error("No pinnedPages returned");
@@ -13,13 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const pinnedPages = response.pinnedPages;
 
-        // Clear any existing rows (if re-opening popup)
         tbody.innerHTML = "";
 
         pinnedPages.forEach((tabId, i) => {
             const keyLabel = (i + 1) % 10;
 
-            // Create <tr> and two <td> cells: one for label, one for URL (or “empty”)
             const row = document.createElement("tr");
 
             const keyCell = document.createElement("td");
@@ -33,20 +30,38 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 urlCell.classList.add("empty");
             }
-            row.append(urlCell);
-            tbody.append(row);
+            row.appendChild(urlCell);
+
+            const actionCell = document.createElement("td");
+            const removeBtn = document.createElement("button");
+            removeBtn.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+`;
+            removeBtn.addEventListener("click", () => {
+                chrome.runtime.sendMessage({
+                    type: "REMOVE_PINNED_PAGE",
+                    index: i
+                });
+                location.reload();
+            });
+            actionCell.appendChild(removeBtn);
+            row.appendChild(actionCell);
+
+            tbody.appendChild(row);
 
             if (tabId !== -1) {
-                // We have a valid tabId → fetch tab info
                 chrome.tabs.get(tabId, (tab) => {
                     if (chrome.runtime.lastError || !tab || !tab.url) {
                         urlCell.textContent = "(closed)";
                         urlCell.classList.add("empty");
                     } else {
-                        // Create an <a> element pointing to tab.url
                         const link = document.createElement("a");
                         link.href = tab.url;
-                        link.textContent = tab.url;
+                        link.textContent = tab.title || "(no title)";
                         link.target = "_blank";
                         link.rel = "noopener";
                         urlCell.appendChild(link);

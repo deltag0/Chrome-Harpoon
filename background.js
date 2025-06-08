@@ -27,7 +27,15 @@ const TabState = {
         for (let i = 0; i < 10; i++) {
             this.pinnedPages[i] = -1;
         }
-        this.pinnedPages = 0;
+        this.pinnedPagesLen = 0;
+        this.syncStorage();
+    },
+    /* On any change to the TabState struct, this callback must be used to sync, the
+    * TabState with the local storage
+    */
+    async modifyTabState(callback, ...args) {
+        await callback(...args);
+        await TabState.syncStorage();
     }
 };
 
@@ -72,7 +80,13 @@ const JumpList = {
         this.maxSize = 100;
         size = 0;
         this.currIdx = -1;
+        this.list = [];
+        this.syncStorage();
     },
+    async modifyJumpList(callback, ...args) {
+        await callback(...args);
+        await JumpList.syncStorage();
+    }
 };
 
 (async () => {
@@ -84,12 +98,6 @@ const JumpList = {
 function setActive(tabId, windowId) {
     chrome.windows.update(windowId, { focused: true }, (window) => {
         chrome.tabs.update(tabId, { active: true })
-    });
-    chrome.action.setIcon({
-        tabId,
-        path: {
-            "128": "./assets/icon_activated.png",
-        }
     });
 }
 
@@ -107,7 +115,6 @@ function setActive(tabId, windowId) {
     * If the JumpList is full, AND the currIdx is at the end of the list the first element 
     * is popped to make space, the tabId is added, and currIdx incremented.
     *
-    * NOTE: storage syncing is handled by handleTabCommands
     */
 function addToJumpList(tabId, windowId) {
     if (JumpList.size === JumpList.maxSize && JumpList.currIdx === JumpList.maxSize - 1) {
@@ -133,7 +140,6 @@ function addToJumpList(tabId, windowId) {
     *
     * If not at the start, switch the active tab to the previously selected
     *
-    * NOTE: storage syncing is handled by handleTabCommands
     */
 function moveBackJumpList() {
     blockNextTab = true;
@@ -152,7 +158,6 @@ function moveBackJumpList() {
     * 
     * If not at the end, switch the active tab to the previously selected
     * 
-    * NOTE: storage syncing is handled by handleTabCommands
     */
 function moveForwardJumpList() {
     blockNextTab = true;
@@ -170,11 +175,10 @@ function moveForwardJumpList() {
 /*
     * addToPinned - If the tabId isn't already pinned, add it to the first available slot
     * @tabId - tab id
-    *   int
+    *   {int}
     *
     * Add a tabId to the pinnedPages.
     *
-    * NOTE: storage syncing is handled by handleTabCommands
     */
 function addToPinned(tabId) {
     if (TabState.pinnedPages.includes(tabId)) {
@@ -185,6 +189,12 @@ function addToPinned(tabId) {
         if (TabState.pinnedPages[i] === -1) {
             console.log("Added: ", tabId);
             TabState.pinnedPages[i] = tabId;
+            chrome.action.setIcon({
+                tabId,
+                path: {
+                    "128": "./assets/icon_activated.png",
+                }
+            });
             return;
         }
     }
@@ -193,17 +203,19 @@ function addToPinned(tabId) {
 
 /*
     * swapTabs - Swap visible tab of user to requested tab if possible
+    * @tabState: Constant reference to TabState
+    *   {TabState}
     * @idx: The tab requested to set active based on the user's numbered options
     *   {int}
     *
     * Given an idx, set the the tab TabState.pinnedPages[idx] active. If the tab is on a different
     * window, fullscreen the window to display that tab.
     *
-    * NOTE: storage syncing is handled by handleTabCommands
     */
-async function swapTab(idx) {
-    if (idx === 0 && TabState.pinnedPages.length === 10) {
-        let tabId = TabState.pinnedPages[9];
+async function swapTab(tabState, idx) {
+    Object.freeze(tabState);
+    if (idx === 0 && tabState.pinnedPages.length === 10) {
+        let tabId = tabState.pinnedPages[9];
 
         if (tabId === -1) {
             console.log("Error while swapping, could not find requested tab")
@@ -217,10 +229,10 @@ async function swapTab(idx) {
             return -1;
         }
 
-        TabState.pinnedPages[9]
+        tabState.pinnedPages[9]
         setActive(tab.id, tab.windowId);
-    } else if (TabState.pinnedPages.length >= idx) {
-        let tabId = TabState.pinnedPages[idx - 1];
+    } else if (tabState.pinnedPages.length >= idx) {
+        let tabId = tabState.pinnedPages[idx - 1];
 
         if (tabId === -1) {
             console.log("Tab requested doesn't exist. No switching");
@@ -261,25 +273,21 @@ async function handleTabCommands(message, port) {
         chrome.tabs.query({
             active: true,
             currentWindow: true
-        }, function(tabs) {
+        }, async function(tabs) {
             var lastTab = tabs[0];
-            addToPinned(lastTab.id);
+            await TabState.modifyTabState(addToPinned, lastTab.id);
         });
     } else if (message.message === "check") {
         console.log("Checking all pinned pages");
     } else if (message.message >= 0 && message.message <= 9) {
         console.log("Swapping");
-        ret = await swapTab(message.message);
+        ret = await swapTab(TabState, message.message);
     } else if (message.message === "front") {
         console.log("should move forward")
-        moveForwardJumpList();
+        await JumpList.modifyJumpList(moveForwardJumpList);
     } else if (message.message === "back") {
-        moveBackJumpList();
+        await JumpList.modifyJumpList(moveBackJumpList);
     }
-
-
-    await JumpList.syncStorage();
-    await TabState.syncStorage();
 
     console.log(ret);
     try {
@@ -311,28 +319,48 @@ chrome.runtime.onConnect.addListener(function(port) {
 /*
     * Listener for messgaes from popup.js which requests the tabs to display to the user UI
     */
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.type === "GET_PINNED_PAGES") {
         sendResponse({ pinnedPages: TabState.pinnedPages });
-    } else if (request.type === "RESET") {
+    } else if (request.type == "REMOVE_PINNED_PAGE") {
+        var idx = request.index;
+        var tabId = TabState.pinnedPages[idx]
+        await TabState.modifyTabState(removeFromPinnedPages, tabId);
+        chrome.action.setIcon({
+            tabId,
+            path: {
+                "128": "./assets/icon_unactivated.png",
+            }
+        });
     }
 });
 
 
 /*
     * @ tabId - tabId
-    *   int
+    *   {int}
     * Function to remove tab from TabState.pinnedPages after it was deleted
     */
-chrome.tabs.onRemoved.addListener(async tabId => {
-    console.log("Removed: ", tabId);
+function removeFromPinnedPages(tabId) {
     for (let i = 0; i < TabState.pinnedPages.length; i++) {
         if (TabState.pinnedPages[i] === tabId) {
             TabState.pinnedPages[i] = -1;
             TabState.pinnedPagesLen--;
+
             break;
         }
     }
+}
+
+
+/*
+    * @ tabId - tabId
+    *   {int}
+    * Function to remove tab from TabState.pinnedPages after it was deleted
+    */
+chrome.tabs.onRemoved.addListener(async tabId => {
+    console.log("Removed: ", tabId);
+    await TabState.modifyTabState(removeFromPinnedPages, tabId);
     var i = JumpList.size;
     while (i--) {
         if (JumpList.list[i][0] === tabId) {
@@ -342,7 +370,6 @@ chrome.tabs.onRemoved.addListener(async tabId => {
     }
 
     await JumpList.syncStorage();
-    await TabState.syncStorage();
 });
 
 
@@ -363,16 +390,7 @@ async function changedTab(activeInfo) {
 
     console.log("Added tab", activeInfo.tabId);
     let tabId = activeInfo.tabId
-    addToJumpList(tabId, activeInfo.windowId);
-    await JumpList.syncStorage();
-    if (TabState.pinnedPages.includes(tabId)) {
-        chrome.action.setIcon({
-            tabId,
-            path: {
-                "128": "./assets/icon_activated.png",
-            }
-        });
-    }
+    await JumpList.modifyJumpList(addToJumpList, tabId, activeInfo.windowId);
 }
 
 
@@ -384,3 +402,36 @@ if (!chrome.tabs.onActivated.hasListener(changedTab)) {
 }
 
 
+/*
+    * Reinject all tabs with the content script
+    */
+function reinjectContentScriptsToAllTabs() {
+    chrome.tabs.query({}, (tabs) => {
+        for (const tab of tabs) {
+            if (!tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    files: ['./content-script.js']
+                });
+            }
+        }
+    });
+}
+
+
+/*
+    * Even listener for installs/resets
+    *
+    * When the extension is installed for the first time, popup the welcome page.
+    * When an extension is reset, call the reset procedure.
+    */
+chrome.runtime.onInstalled.addListener(details => {
+    // if (details === chrome.runtime.OnInstalledReason.INSTALL) {
+    chrome.tabs.create({
+        url: chrome.runtime.getURL("./installation//install.html")
+    });
+    // }
+    JumpList.reset();
+    TabState.reset();
+    reinjectContentScriptsToAllTabs();
+});

@@ -47,6 +47,32 @@
             color: #999;
             font-style: italic;
         }
+
+        button {
+            background: none;
+            border: none;
+            padding: 4px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        button svg {
+            stroke: #666;
+            transition: stroke 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #e74c3c;
+            /* Chrome-like red */
+        }
+
+        button:hover svg {
+            stroke: white;
+        }
     </style>
 </head>
 
@@ -57,6 +83,7 @@
             <tr>
                 <th>Key</th>
                 <th>URL</th>
+                <th>Actions</th> <!-- new column header -->
             </tr>
         </thead>
         <tbody>

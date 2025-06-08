@@ -78,7 +78,7 @@ document.addEventListener("keydown", event => {
     pressed_keys[event.key] = true;
     console.log(pressed_keys);
 
-    if (pressed_keys[leader]) {
+    if (pressed_keys[leader] || event.altKey) {
         try {
             var port = chrome.runtime.connect({ name: "tabs" });
         } catch (err) {
@@ -100,7 +100,7 @@ document.addEventListener("keydown", event => {
                 console.log("Error occured while processing input")
             }
         });
-    } if (event.ctrlKey) {
+    } if (event.ctrlKey || event.altKey) {
         try {
             var port = chrome.runtime.connect({ name: "tabs" });
         } catch (err) {
