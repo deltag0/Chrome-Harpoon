@@ -4,9 +4,13 @@
 	"version": "1.0",
 	"manifest_version": 3,
 	"action": {
-		"default_title": "Click",
-		"default_popup": "popup.html"
+		"default_title": "Harpoon",
+		"default_popup": "popup.html",
+		"default_icon": "./assets/icon_unactivated.png"
 	},
+"icons": {
+	"128": "./assets/icon_activated.png"
+},
 "permissions": ["storage", "activeTab", "scripting", "tabs"],
 	"background": {
 		"service_worker": "background.js"

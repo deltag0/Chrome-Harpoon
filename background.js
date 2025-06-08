@@ -23,6 +23,12 @@ const TabState = {
             }
         })
     },
+    reset() {
+        for (let i = 0; i < 10; i++) {
+            this.pinnedPages[i] = -1;
+        }
+        this.pinnedPages = 0;
+    }
 };
 
 
@@ -62,6 +68,11 @@ const JumpList = {
             }
         });
     },
+    reset() {
+        this.maxSize = 100;
+        size = 0;
+        this.currIdx = -1;
+    },
 };
 
 (async () => {
@@ -73,6 +84,12 @@ const JumpList = {
 function setActive(tabId, windowId) {
     chrome.windows.update(windowId, { focused: true }, (window) => {
         chrome.tabs.update(tabId, { active: true })
+    });
+    chrome.action.setIcon({
+        tabId,
+        path: {
+            "128": "./assets/icon_activated.png",
+        }
     });
 }
 
@@ -238,7 +255,7 @@ async function swapTab(idx) {
     *   Any integer from 0-9 will switch to the corresponding tab (0 would be the tenth tab)
     *   if it exists.
     */
-async function handleTabCommands(message) {
+async function handleTabCommands(message, port) {
     let ret = 0;
     if (message.message === "add") {
         chrome.tabs.query({
@@ -252,7 +269,7 @@ async function handleTabCommands(message) {
         console.log("Checking all pinned pages");
     } else if (message.message >= 0 && message.message <= 9) {
         console.log("Swapping");
-        ret = swapTab(message.message);
+        ret = await swapTab(message.message);
     } else if (message.message === "front") {
         console.log("should move forward")
         moveForwardJumpList();
@@ -263,7 +280,17 @@ async function handleTabCommands(message) {
 
     await JumpList.syncStorage();
     await TabState.syncStorage();
-    return ret;
+
+    console.log(ret);
+    try {
+        if (ret === 0) {
+            port.postMessage({ status: "ok" });
+        } else {
+            port.postMessage({ status: "bad" });
+        }
+    } catch (err) {
+        console.log("Failed to send response to content script. Unexpected interruption");
+    }
 }
 
 
@@ -276,17 +303,7 @@ chrome.runtime.onConnect.addListener(function(port) {
     }
 
     if (port.name === "tabs") {
-        var ret = 0;
-        port.onMessage.addListener(ret = handleTabCommands);
-        try {
-            if (ret == 0) {
-                port.postMessage({ status: "ok" });
-            } else {
-                port.postMessage({ status: "bad" });
-            }
-        } catch (err) {
-            console.log("Failed to send response to content script. Unexpected interruption");
-        }
+        port.onMessage.addListener(msg => handleTabCommands(msg, port));
     }
 });
 
@@ -297,6 +314,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "GET_PINNED_PAGES") {
         sendResponse({ pinnedPages: TabState.pinnedPages });
+    } else if (request.type === "RESET") {
     }
 });
 
@@ -343,9 +361,18 @@ async function changedTab(activeInfo) {
         return;
     }
 
-    console.log("Added tab");
-    addToJumpList(activeInfo.tabId, activeInfo.windowId);
+    console.log("Added tab", activeInfo.tabId);
+    let tabId = activeInfo.tabId
+    addToJumpList(tabId, activeInfo.windowId);
     await JumpList.syncStorage();
+    if (TabState.pinnedPages.includes(tabId)) {
+        chrome.action.setIcon({
+            tabId,
+            path: {
+                "128": "./assets/icon_activated.png",
+            }
+        });
+    }
 }
 
 
@@ -355,3 +382,5 @@ async function changedTab(activeInfo) {
 if (!chrome.tabs.onActivated.hasListener(changedTab)) {
     chrome.tabs.onActivated.addListener(changedTab);
 }
+
+

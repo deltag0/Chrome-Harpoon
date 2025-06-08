@@ -76,6 +76,7 @@ document.addEventListener("keydown", event => {
     }
 
     pressed_keys[event.key] = true;
+    console.log(pressed_keys);
 
     if (pressed_keys[leader]) {
         try {
@@ -99,17 +100,17 @@ document.addEventListener("keydown", event => {
                 console.log("Error occured while processing input")
             }
         });
-    } else if (event.ctrlKey) {
+    } if (event.ctrlKey) {
         try {
             var port = chrome.runtime.connect({ name: "tabs" });
         } catch (err) {
             return;
         }
-        if (event.key === "z") {
+        if (pressed_keys["z"]) {
             sendRequest("back", port);
             pressed_keys['z'] = false;
             return;
-        } else if (event.key === "y") {
+        } else if (pressed_keys["y"]) {
             sendRequest("front", port);
             pressed_keys['y'] = false;
             return;
