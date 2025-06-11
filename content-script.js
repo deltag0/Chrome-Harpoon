@@ -52,13 +52,12 @@ setInterval(sendDummyMessage, 29000);
     * This 
     *
     * Possible key combinations:
-    *   <space> +
+    *   <Alt> +
     *       "a": Mark current tab
     *       "e": View all marked tabs
     *       1-9: Swap current tab with corresponding marked tab
-    *   <ctrl> +
-    *       "i": go to next tab in jump list
-    *       "o": go to previous tab in jump list
+    *       "y": go to next tab in jump list
+    *       "z": go to previous tab in jump list
     */
 document.addEventListener("keydown", event => {
     const active = document.activeElement;

@@ -270,6 +270,10 @@ async function swapTab(tabState, idx) {
     * 0-9:
     *   Any integer from 0-9 will switch to the corresponding tab (0 would be the tenth tab)
     *   if it exists.
+    * "front":
+    *   Move forward in the jump list if possible
+    * "back":
+    *   Move backwards in the jump list if possible
     */
 async function handleTabCommands(message, port) {
     let ret = 0;
@@ -307,7 +311,7 @@ async function handleTabCommands(message, port) {
 
 
 /**
-    * Listener for messages
+    * Listener for messages on a port
     */
 chrome.runtime.onConnect.addListener(function(port) {
     if (port.name === "dummy") { // message just to keep the service worker from going inactive
