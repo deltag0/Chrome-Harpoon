@@ -1,5 +1,8 @@
 const TabState = {
     pinnedPages: Array(10).fill(-1),
+    // Saving pinned urls of the pinned pages because chrome might change tab ids after 
+    // a period of long inactivity like an entire night
+    pinnedUrls: Array(10).fill(-1),
     pinnedPagesLen: 0,
 
     async load() {
@@ -8,8 +11,10 @@ const TabState = {
             const saved = data.TabState;
             console.log(saved.pinnedPages);
             this.pinnedPagesLen = saved.pinnedPagesLen;
+
             for (let i = 0; i < saved.pinnedPages.length; i++) {
                 this.pinnedPages[i] = saved.pinnedPages[i];
+                this.pinnedUrls[i] = saved.pinnedUrls[i];
             }
         }
         return this;
@@ -20,12 +25,14 @@ const TabState = {
             TabState: {
                 pinnedPages: this.pinnedPages,
                 pinnedPagesLen: this.pinnedPagesLen,
+                pinnedUrls: this.pinnedUrls,
             }
         })
     },
     reset() {
         for (let i = 0; i < 10; i++) {
             this.pinnedPages[i] = -1;
+            this.pinnedUrls[i] = -1;
         }
         this.pinnedPagesLen = 0;
         this.syncStorage();
@@ -461,4 +468,25 @@ chrome.runtime.onInstalled.addListener(details => {
     JumpList.reset();
     TabState.reset();
     reinjectContentScriptsToAllTabs();
+});
+
+
+
+function restoreLostTabs(tabs) {
+    TabState.pinnedPages.forEach((tabId) => {
+        if (!tabs.includes(tabId)) {
+            TabState.modifyTabState(removeFromPinnedPages, tabId);
+        }
+
+    });
+    tabs.forEach((tab) => {
+
+
+    });
+
+}
+
+
+chrome.runtime.onStartup.addListener(async () => {
+    chrome.tabs.query({}).then(restoreLostTabs, () => { console.error("Error while restoring tabs"); });
 });
