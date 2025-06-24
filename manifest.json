@@ -1,7 +1,7 @@
 {
 	"name": "Web Harpoon",
   "description": "Pin pages using commands and easily jump to them with keyboard commands only!",
-	"version": "1.0",
+	"version": "1.0.1",
 	"manifest_version": 3,
 	"action": {
 		"default_title": "Harpoon",
