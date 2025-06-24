@@ -85,7 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     } else {
                         const link = document.createElement("a");
                         link.href = tab.url;
-                        link.textContent = tab.title || "(no title)";
+                        let title = tab.title.substring(0, 20) + (tab.title.length > 18 ? "..." : "") || "(no title)";
+                        link.textContent = title;
                         link.target = "_blank";
                         link.rel = "noopener";
                         urlCell.appendChild(link);

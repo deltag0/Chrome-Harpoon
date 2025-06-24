@@ -205,6 +205,18 @@ function addToPinned(tabId) {
 }
 
 
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (TabState.pinnedPages.includes(tabId)) {
+        chrome.action.setIcon({
+            tabId,
+            path: {
+                "128": "./assets/icon_activated.png",
+            }
+        });
+    }
+});
+
+
 /*
     * swapTabs - Swap visible tab of user to requested tab if possible
     * @tabState: Constant reference to TabState
@@ -453,7 +465,7 @@ function reinjectContentScriptsToAllTabs() {
     * When an extension is reset, call the reset procedure.
     */
 chrome.runtime.onInstalled.addListener(details => {
-    if (details === chrome.runtime.OnInstalledReason.INSTALL) {
+    if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
         chrome.tabs.create({
             url: chrome.runtime.getURL("./installation//install.html")
         });

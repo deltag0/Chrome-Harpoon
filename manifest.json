@@ -17,13 +17,15 @@
 	},
   "content_scripts": [
 	  {
-		  "js": ["content-script.js"],
+		  "js": ["DomUtils.js", "ui.js", "content-script.js"],
 		  "matches": ["<all_urls>"]
 	  }
   ],
 "web_accessible_resources": [
   {
-    "resources": ["/assets/banner.png"],
+    "resources": ["/assets/banner.png",
+		  "installation/install.html",
+		  "/pages/harpoon.html"],
     "matches": ["<all_urls>"]
   }
 ],

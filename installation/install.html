@@ -37,44 +37,42 @@
 
     .thumbnail {
         width: 100%;
-        max-width: 800px;
-        /* Optional max-width to keep it reasonable on large screens */
-        height: auto;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        max-width: 1200px;
+        height: 360px;
+        border-radius: 8px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
         display: block;
-        margin: 40px auto 20px auto;
-        /* Center it and add vertical spacing */
+        margin: 24px auto;
         object-fit: cover;
     }
 </style>
 <img src="/assets/banner.png"" class=" thumbnail" />
-<br>
 <p>Thank you for downloading Chrome-Harpoon!</p>
 
 <p>
-    Chrome-Harpoon is an extension similar to the Neovim plugin made by ThePrimeagen
-    (<a href="https://github.com/ThePrimeagen/harpoon">check it out!</a>), but you don't need to know any of that
-    to start using Harpoon.<br />
-    Harpoon is a minimalist extension that lets users mark/pin tabs (up to 10) and switch to them using keyboard
-    shortcuts.
-    It also includes shortcuts to switch back and forth between the last-used tabs easily.<br />
+    Chrome Harpoon is a minimalistic productivity-focused Chrome extension that helps you stay in flow by letting you
+    quickly mark
+    and jump to frequently used tabs with custom keybindings. Inspired by Harpoon on Neovim
+    (<a href="https://github.com/ThePrimeagen/harpoon">check it out!</a>), it's designed for anyone who wants faster tab
+    navigation without reaching for the mouse. <br>
+    If you sometimes struggle to find which tab you wanted to switch back to from your tens or even hundreds of tabs,
+    this extension is for you!<br />
     It's also fully compatible with Vimium!
 </p>
-
+<h2>Instructions and Commands</h2>
 <p>
     To start using Chrome-Harpoon, here's a breakdown of the commands:
 </p>
 
 <ul>
-    <li><code>Alt a</code> will mark/pin a tab</li>
+    <li><code>Alt A</code> will mark/pin a tab</li>
     <li><code>Alt 0-9</code> will switch to the marked tab (if existing), with 1 being the first marked tab and 0 the
         last</li>
-    <li><code>Alt z</code> will switch tabs to the previously selected tab</li>
-    <li><code>Alt y</code> will undo a <code>ctrl z</code> switch</li>
+    <li><code>Alt Z</code> will witch back to the previously selected tab</li>
+    <li><code>Alt Y</code> will undo a tab switch (similar to <code>Ctrl Y</code> in text)</li>
 </ul>
 <p>
-    You can also click on the extension icon to remove a pinned tab at any time.
+    You can also click on the extension icon to modify your pinned tabs.
 </p>
 
 </html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harpoon UI</title>
+    <script type="module" src="../iframe.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e1e;
+            color: #ddd;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+        }
+
+        body.harpoon-ui-visible .harpoon-ui {
+            display: block;
+        }
+
+        .harpoon-ui {
+            background: #2c2c2c;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            min-width: 400px;
+        }
+
+        .harpoon-ui h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .harpoon-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            background: #3c3c3c;
+            cursor: pointer;
+        }
+
+        .harpoon-item:hover {
+            background: #505050;
+        }
+
+        .harpoon-key {
+            color: #888;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="harpoon-ui">
+        <h2>Harpoon Marks</h2>
+        <div class="harpoon-item"><span class="harpoon-key">[1]</span> src/main.py</div>
+        <div class="harpoon-item"><span class="harpoon-key">[2]</span> src/config.js</div>
+        <div class="harpoon-item"><span class="harpoon-key">[3]</span> src/utils/helpers.py</div>
+        <div class="harpoon-item"><span class="harpoon-key">[4]</span> README.md</div>
+        <div class="harpoon-item"><span class="harpoon-key">[5]</span> tests/test_main.py</div>
+    </div>
+</body>
+
+</html>

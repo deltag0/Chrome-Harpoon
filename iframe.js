@@ -1,0 +1,93 @@
+import * as UIComponentMessenger from "./pages/ui_component_messenger.js"
+/*
+    * NOTE: This script gets activated from an HTML file
+    */
+
+let pagePort = null;
+let handleMessage = null;
+
+let ui = null;
+
+async function activate() {
+    if (ui == null) {
+        ui = new HarpoonUI();
+    }
+
+}
+
+
+class HarpoonUI {
+    pressed_keys = {};
+    constructor() {
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyUp = this.onKeyUp.bind(this);
+        this.update = this.update.bind(this);
+        this.initDom();
+    }
+
+    async update() {
+
+    }
+
+    onKeyDown(event) {
+        this.pressed_keys[event.key] = true;
+
+        // TODO: add functions!
+        if (event.key === "j") {
+        } else if (event.key === "k") {
+        } else if (event.key === "x") {
+        } else if (event.key === "Enter") {
+        }
+
+    }
+    onKeyUp(event) {
+        this.pressed_keys[event.key] = false;
+    }
+
+    initDom() {
+        this.box = document.getElementById("harpoon-ui");
+        this.input = this.box.querySelector("input");
+        this.input.addEventListener("keydown", this.onKeyDown);
+        this.input.addEventListener("keyup", this.onKeyUp);
+
+        document.addEventListener("click", () => this.hide());
+    }
+};
+
+
+// window.addEventListener("message", registerMessage);
+
+
+// async function registerMessage(event) {
+//     switch (event.data) {
+//         case "SET_IFRAME_PORT":
+
+//             break;
+//         default:
+//             console.error("HERE: Unrecognized message type");
+//             break;
+//     }
+
+
+// }
+
+function init() {
+    UIComponentMessenger.init();
+    UIComponentMessenger.registerHandler((event) => {
+        switch (event.name) {
+            case "hide":
+                ui?.hide();
+                break;
+            case "hidden":
+                ui?.onHidden();
+                break;
+            case "activate":
+                activate();
+                break;
+            default:
+                console.log("Unrecognized message: ", event.data.name);
+        }
+    });
+}
+
+init();

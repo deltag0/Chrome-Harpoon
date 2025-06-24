@@ -1,7 +1,34 @@
 // Dictionary of the form: {string, bool} indicating if a key is pressed
 const pressed_keys = {};
-const leader = " ";
+// TODO: const leader = " ";
 
+
+/*
+    * Wraps the harpoon iframe and handles all commands related to the iframe
+    * to initialize it. Commands to cycle and delete items are not supposed to be here.
+    */
+const Harpoon = {
+    harpoonUI: null,
+
+    init() {
+        if (!this.harpoonUI) {
+            this.harpoonUI = new UIComponent();
+            // Need the classname to be able to manipulate the iframe from the parent (like hiding)
+            this.harpoonUI.load("pages/harpoon.html", "harpoon-frame");
+        }
+    },
+    // Entry point to creating the Harpoon Iframe
+    activate() {
+        this.init();
+        this.harpoonUI.show(
+            { name: "activate" },
+            { focus: true },
+        );
+    },
+
+}
+
+var harpoon = null;
 
 /**
     * Release key in pressed_keys
@@ -80,7 +107,29 @@ document.addEventListener("keydown", event => {
         }
         if (pressed_keys["a"]) {
             sendRequest("add", port);
-        } else {
+        } else if (pressed_keys["z"]) {
+            sendRequest("back", port);
+            // The pressed keys for y, z, and numbers is set to false,
+            // because this will change tabs, making the event listener
+            // miss the key up event.
+            pressed_keys['z'] = false;
+            event.altKey = false;
+            return;
+        } else if (pressed_keys["y"]) {
+            sendRequest("front", port);
+            pressed_keys['y'] = false;
+            return;
+        } else if (pressed_keys["w"]) {
+            // TODO:
+            // console.log("PRESSED H");
+            // if (!harpoon) {
+            //     harpoon = Harpoon;
+            //     harpoon.activate();
+            // } else {
+            //     harpoon.activate();
+            // }
+        }
+        else {
             for (let i = 0; i < 10; i++) {
                 if (pressed_keys[i.toString()]) {
                     sendRequest(i, port);
@@ -94,26 +143,5 @@ document.addEventListener("keydown", event => {
                 console.log("Error occured while processing input")
             }
         });
-    } if (event.altKey) {
-        try {
-            var port = chrome.runtime.connect({ name: "tabs" });
-        } catch (err) {
-            return;
-        }
-        if (pressed_keys["z"]) {
-            sendRequest("back", port);
-            pressed_keys['z'] = false;
-            event.altKey = false;
-            return;
-        } else if (pressed_keys["y"]) {
-            sendRequest("front", port);
-            pressed_keys['y'] = false;
-            return;
-        }
-        // port.onMessage.addListener(function(message) {
-        //     if (message.status === "bad") {
-        //         console.log("Error occured while processing input")
-        //     }
-        // });
     }
 });
