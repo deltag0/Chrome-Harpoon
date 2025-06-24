@@ -3,7 +3,7 @@
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/kjcljpflpbjllhimbmikkcdpfdahbiho?style=flat-square)](https://chromewebstore.google.com/detail/web-harpoon/kjcljpflpbjllhimbmikkcdpfdahbiho?authuser=0&hl=en)
 
 <!-- Banner Image -->
-![Banner](./banner.png) <!-- Replace with your actual image path -->
+![Banner](./assets/banner.png) <!-- Replace with your actual image path -->
 
 ## Overview
 
