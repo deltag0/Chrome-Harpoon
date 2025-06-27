@@ -24,12 +24,24 @@ Install directly from the Chrome Web Store:
 👉 [Chrome Harpoon on the Web Store](https://chromewebstore.google.com/detail/web-harpoon/kjcljpflpbjllhimbmikkcdpfdahbiho?authuser=0&hl=en)
 
 ## Usage
+
 | Shortcut     | Action                                                                 |
-|------------|-------------------------------------------------------------------------|
-| `Alt + A`   | **Mark/Pin the current tab**                                           |
-| `Alt + 0–9` | **Switch to a marked tab** (1 is the first marked tab, 0 is the last) |
-| `Alt + Z`   | **Go back to the previously selected tab**                            |
-| `Alt + Y`   | **Undo a tab switch** (similar to `Ctrl + Y` in text editors)         |
+|--------------|------------------------------------------------------------------------|
+| `Alt + A`    | **Mark/Pin the current tab**                                           |
+| `Alt + 0–9`  | **Switch to a marked tab** (1 is the first marked tab, 0 is the last) |
+| `Alt + Z`    | **Go back to the previously selected tab**                            |
+| `Alt + Y`    | **Undo a tab switch** (similar to `Ctrl + Y` in text editors)         |
+| `Alt + W`    | **Open the pinned tabs UI (iframe view)**                             |
+
+### In the UI (iframe)
+
+| Key          | Action                                  |
+|--------------|------------------------------------------|
+| `j`          | Move selection down                      |
+| `k`          | Move selection up                        |
+| `Enter`      | Switch to the selected marked tab        |
+| `x`          | Remove/delete the selected marked tab    |
+| `0–9`        | Switch directly to the corresponding mark |
 
 ## Differences Between Normal Marks
 * Returns to same place where you left off
