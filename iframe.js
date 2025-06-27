@@ -13,12 +13,54 @@ async function activate() {
         ui = new HarpoonUI();
     }
 
+    // Fetch pinned pages once
+    chrome.runtime.sendMessage({ type: "GET_PINNED_PAGES" }, (response) => {
+        ui.pinnedPages = response.pinnedPages
+        console.log(response.pinnedPages);
+        const container = document.getElementById('pins');
+        container.innerHTML = '';
+
+        ui.pinnedPages.forEach((tabId, idx) => {
+            const item = document.createElement('div');
+            item.className = 'harpoon-item' + (idx === 0 ? ' active' : '');
+
+            const keySpan = document.createElement('span');
+            keySpan.className = 'harpoon-key';
+            keySpan.textContent = `[${(idx + 1) % 10}]`;
+            item.appendChild(keySpan);
+
+            const label = document.createElement('span');
+            label.className = 'harpoon-label';
+            if (tabId !== -1) {
+                chrome.tabs.get(tabId, (tab) => {
+                    console.log(tab.title);
+                    if (chrome.runtime.lastError || !tab || !tab.url) {
+                        label.textContent = "(closed)";
+                        label.classList.add("empty");
+                    } else {
+                        label.textContent = tab.title.substring(0, 20) + (tab.title.length > 18 ? "..." : "") || "(no title)";
+                        label.classList.remove("empty");
+                    }
+
+                });
+            } else {
+                label.textContent = "(empty)";
+                label.classList.add("empty");
+            }
+            item.appendChild(label);
+
+            container.appendChild(item);
+        });
+    });
 }
 
 
 class HarpoonUI {
-    pressed_keys = {};
     box;
+    // idx
+    currTab = 0;
+    pinnedPages;
+
     constructor() {
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
@@ -32,23 +74,52 @@ class HarpoonUI {
     }
 
     onKeyDown(event) {
-        this.pressed_keys[event.key] = true;
 
-        // TODO: add functions!
+        // NOTE: Users could technically delete marks
+        // while the iframe is open from the icon, but
+        // I'm leaving that to undefined behaviour instead
+        // of fetching every time
         if (event.key === "j") {
+            var labels = document.querySelectorAll(".harpoon-item");
+            const tab = labels[this.currTab];
+            tab.className = 'harpoon-item';
+            this.currTab = (this.currTab + 1) % 10;
+            console.log(this.currTab);
+            const newCurr = labels[this.currTab];
+            newCurr.className = 'harpoon-item' + ' active';
         } else if (event.key === "k") {
+            var labels = document.querySelectorAll(".harpoon-item");
+            const tab = labels[this.currTab];
+            tab.className = 'harpoon-item';
+            this.currTab = this.currTab === 0 ? labels.length - 1 : this.currTab - 1;
+            const newCurr = labels[this.currTab];
+            newCurr.className = 'harpoon-item' + ' active';
         } else if (event.key === "x") {
+            var labels = document.querySelectorAll(".harpoon-label");
+            const tab = labels[this.currTab];
+            tab.classList.add("empty");
+            tab.innerHTML = "(empty)";
+            chrome.runtime.sendMessage({
+                type: "REMOVE_PINNED_PAGE",
+                index: this.currTab
+            });
         } else if (event.key === "Enter") {
+            var idx = this.currTab + 1;
+            this.hide();
+            chrome.runtime.sendMessage({
+                type: "MOVE_TO_PINNED_PAGE",
+                index: idx
+            });
         } else if (event.key === "Escape") {
             this.hide();
         }
 
     }
     onKeyUp(event) {
-        this.pressed_keys[event.key] = false;
     }
 
     hide(event) {
+        this.currTab = 0;
         UIComponentMessenger.postMessage({ name: "hide" });
     }
 

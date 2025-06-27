@@ -354,6 +354,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         });
     } else if (request.type === 'REORDER_PINNED_PAGES') {
         await TabState.modifyTabState(reorderPinnedPages, request.newOrder);
+    } else if (request.type === "MOVE_TO_PINNED_PAGE") { // The index relative to the pinned number
+        var idx = request.index;
+        swapTab(TabState, idx);
     }
 });
 

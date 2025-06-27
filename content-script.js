@@ -28,7 +28,7 @@ const Harpoon = {
 
     hide() {
         this.init();
-        this.harpoonUI.setIframeVisible(false);
+        this.harpoonUI.postMessage({ name: "hide" });
     }
 }
 
@@ -133,7 +133,6 @@ document.addEventListener("keydown", event => {
             pressed_keys['y'] = false;
             return;
         } else if (pressed_keys["w"]) {
-            // TODO:
             if (!harpoon) {
                 harpoon = Harpoon;
                 harpoon.activate();

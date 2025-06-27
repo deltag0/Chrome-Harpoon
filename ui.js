@@ -56,8 +56,6 @@ class UIComponent {
             // Transfer ownership of port2 to the iframeElement
             this.iframeElement.contentWindow.postMessage(null, targetOrigin, [port2]);
             // Handler for messages from port2
-            // TODO: Need to add something similar to the ui_component_messenger.js file
-            // from vimium
             port1.onmessage = (event) => {
                 let eventName = null;
                 if (event) {
