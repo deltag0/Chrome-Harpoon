@@ -26,9 +26,22 @@ const Harpoon = {
         );
     },
 
+    hide() {
+        this.init();
+        this.harpoonUI.setIframeVisible(false);
+    }
 }
 
+
 var harpoon = null;
+
+
+document.addEventListener("click", event => {
+    if (harpoon) {
+        harpoon.hide();
+    }
+});
+
 
 /**
     * Release key in pressed_keys
@@ -113,7 +126,7 @@ document.addEventListener("keydown", event => {
             // because this will change tabs, making the event listener
             // miss the key up event.
             pressed_keys['z'] = false;
-            event.altKey = false;
+            event.altKey = false; // FIXME: Don't think this is supposed to be here
             return;
         } else if (pressed_keys["y"]) {
             sendRequest("front", port);
@@ -121,13 +134,13 @@ document.addEventListener("keydown", event => {
             return;
         } else if (pressed_keys["w"]) {
             // TODO:
-            // console.log("PRESSED H");
-            // if (!harpoon) {
-            //     harpoon = Harpoon;
-            //     harpoon.activate();
-            // } else {
-            //     harpoon.activate();
-            // }
+            if (!harpoon) {
+                harpoon = Harpoon;
+                harpoon.activate();
+            } else {
+                harpoon.activate();
+            }
+            pressed_keys["w"] = false;
         }
         else {
             for (let i = 0; i < 10; i++) {

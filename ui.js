@@ -64,6 +64,7 @@ class UIComponent {
                     eventName = (event.data ? event.data.name : undefined);
                 }
                 console.log(event);
+                console.log(eventName);
 
                 switch (eventName) {
                     case "uiComponentIsReady":
@@ -86,7 +87,8 @@ class UIComponent {
                         this.iframeFrameId = event.data.iframeFrameId;
                         break;
                     case "hide":
-                        return this.hide();
+                        this.setIframeVisible(false);
+                        break;
                 }
             };
         });

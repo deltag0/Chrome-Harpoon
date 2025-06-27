@@ -18,10 +18,12 @@ async function activate() {
 
 class HarpoonUI {
     pressed_keys = {};
+    box;
     constructor() {
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
         this.update = this.update.bind(this);
+        this.hide = this.hide.bind(this);
         this.initDom();
     }
 
@@ -37,6 +39,8 @@ class HarpoonUI {
         } else if (event.key === "k") {
         } else if (event.key === "x") {
         } else if (event.key === "Enter") {
+        } else if (event.key === "Escape") {
+            this.hide();
         }
 
     }
@@ -44,13 +48,15 @@ class HarpoonUI {
         this.pressed_keys[event.key] = false;
     }
 
-    initDom() {
-        this.box = document.getElementById("harpoon-ui");
-        this.input = this.box.querySelector("input");
-        this.input.addEventListener("keydown", this.onKeyDown);
-        this.input.addEventListener("keyup", this.onKeyUp);
+    hide(event) {
+        UIComponentMessenger.postMessage({ name: "hide" });
+    }
 
-        document.addEventListener("click", () => this.hide());
+    initDom() {
+        this.box = document.getElementsByClassName("harpoon-ui");
+        console.log(this.box);
+        document.addEventListener("keydown", this.onKeyDown);
+        document.addEventListener("keyup", this.onKeyUp);
     }
 };
 
@@ -74,7 +80,7 @@ class HarpoonUI {
 function init() {
     UIComponentMessenger.init();
     UIComponentMessenger.registerHandler((event) => {
-        switch (event.name) {
+        switch (event.data.name) {
             case "hide":
                 ui?.hide();
                 break;
