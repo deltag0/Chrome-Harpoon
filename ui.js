@@ -44,9 +44,7 @@ class UIComponent {
 
         // this.setIframeVisible(false);
         this.iframeElement.src = chrome.runtime.getURL(iframeUrl);
-        console.log("loaded iframe");
         await DomUtils.documentReady();
-        console.log("Document is ready");
         document.documentElement.appendChild(shadowWrapper);
 
         const { port1, port2 } = new MessageChannel();
@@ -61,9 +59,6 @@ class UIComponent {
                 if (event) {
                     eventName = (event.data ? event.data.name : undefined);
                 }
-                console.log(event);
-                console.log(eventName);
-
                 switch (eventName) {
                     case "uiComponentIsReady":
                         // If this frame receives the focus, then hide the UI component.

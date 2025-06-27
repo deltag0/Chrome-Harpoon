@@ -110,7 +110,6 @@ document.addEventListener("keydown", event => {
     }
 
     pressed_keys[event.key] = true;
-    console.log(pressed_keys);
 
     if (event.altKey) {
         try {

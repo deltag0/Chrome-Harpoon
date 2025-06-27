@@ -3,7 +3,7 @@
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/kjcljpflpbjllhimbmikkcdpfdahbiho?style=flat-square)](https://chromewebstore.google.com/detail/web-harpoon/kjcljpflpbjllhimbmikkcdpfdahbiho?authuser=0&hl=en)
 
 <!-- Banner Image -->
-![Banner](./assets/banner.png) <!-- Replace with your actual image path -->
+![Banner](./assets/banner.png)
 
 ## Overview
 
@@ -24,8 +24,6 @@ Install directly from the Chrome Web Store:
 👉 [Chrome Harpoon on the Web Store](https://chromewebstore.google.com/detail/web-harpoon/kjcljpflpbjllhimbmikkcdpfdahbiho?authuser=0&hl=en)
 
 ## Usage
-Your extension provides a quick and intuitive way to switch between marked tabs. Here’s a summary of the available shortcuts:
-
 | Shortcut     | Action                                                                 |
 |------------|-------------------------------------------------------------------------|
 | `Alt + A`   | **Mark/Pin the current tab**                                           |

@@ -6,7 +6,6 @@ const TabState = {
         const data = await chrome.storage.local.get("TabState");
         if (data.TabState) {
             const saved = data.TabState;
-            console.log(saved.pinnedPages);
             this.pinnedPagesLen = saved.pinnedPagesLen;
             for (let i = 0; i < saved.pinnedPages.length; i++) {
                 this.pinnedPages[i] = saved.pinnedPages[i];
@@ -119,7 +118,6 @@ function setActive(tabId, windowId) {
     */
 function addToJumpList(tabId, windowId) {
     if (JumpList.size === JumpList.maxSize && JumpList.currIdx === JumpList.maxSize - 1) {
-        console.log("JumpList was full. Removed last element and replaced with new tab");
         JumpList.list.shift();
         JumpList.list.push([tabId, windowId]);
     } else {
@@ -145,8 +143,6 @@ function addToJumpList(tabId, windowId) {
     */
 function moveBackJumpList() {
     blockNextTab = true;
-    console.log("Moving back", JumpList.currIdx, JumpList.list);
-    console.log("Removed changedTab?", !chrome.tabs.onActivated.hasListener(changedTab));
     if (JumpList.currIdx > 0) {
         JumpList.currIdx--;
         const idx = JumpList.currIdx;
@@ -164,10 +160,7 @@ function moveBackJumpList() {
     */
 function moveForwardJumpList() {
     blockNextTab = true;
-    console.log("Removed changedTab?", !chrome.tabs.onActivated.hasListener(changedTab));
-    console.log("Moving forward", JumpList.currIdx, JumpList.list);
     if (JumpList.currIdx < JumpList.size - 1) {
-        console.log("Actually moved");
         JumpList.currIdx += 1;
         const idx = JumpList.currIdx;
         setActive(JumpList.list[idx][0], JumpList.list[idx][1]);
@@ -188,7 +181,6 @@ function addToPinned(tabId) {
     if (TabState.pinnedPages.includes(tabId)) {
         return;
     }
-    console.log(TabState.pinnedPages);
     for (let i = 0; i < TabState.pinnedPages.length; i++) {
         if (TabState.pinnedPages[i] === -1) {
             console.log("Added: ", tabId);

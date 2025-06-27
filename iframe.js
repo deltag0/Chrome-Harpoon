@@ -16,7 +16,6 @@ async function activate() {
     // Fetch pinned pages once
     chrome.runtime.sendMessage({ type: "GET_PINNED_PAGES" }, (response) => {
         ui.pinnedPages = response.pinnedPages
-        console.log(response.pinnedPages);
         const container = document.getElementById('pins');
         container.innerHTML = '';
 
@@ -33,7 +32,6 @@ async function activate() {
             label.className = 'harpoon-label';
             if (tabId !== -1) {
                 chrome.tabs.get(tabId, (tab) => {
-                    console.log(tab.title);
                     if (chrome.runtime.lastError || !tab || !tab.url) {
                         label.textContent = "(closed)";
                         label.classList.add("empty");
@@ -84,7 +82,6 @@ class HarpoonUI {
             const tab = labels[this.currTab];
             tab.className = 'harpoon-item';
             this.currTab = (this.currTab + 1) % 10;
-            console.log(this.currTab);
             const newCurr = labels[this.currTab];
             newCurr.className = 'harpoon-item' + ' active';
         } else if (event.key === "k") {
@@ -112,6 +109,18 @@ class HarpoonUI {
             });
         } else if (event.key === "Escape") {
             this.hide();
+        } else {
+            for (let i = 0; i < 10; i++) {
+                if (event.key == i) {
+                    this.hide();
+                    chrome.runtime.sendMessage({
+                        type: "MOVE_TO_PINNED_PAGE",
+                        index: i
+                    });
+                    break;
+                }
+            }
+
         }
 
     }
@@ -125,7 +134,6 @@ class HarpoonUI {
 
     initDom() {
         this.box = document.getElementsByClassName("harpoon-ui");
-        console.log(this.box);
         document.addEventListener("keydown", this.onKeyDown);
         document.addEventListener("keyup", this.onKeyUp);
     }
