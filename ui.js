@@ -21,10 +21,10 @@ class UIComponent {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 600px; /* or whatever width you need */
-            height: 400px; /* or any height */
+            width: 600px;
+            height: 300px;
             border: none;
-            z-index: 999999; /* make sure it’s on top */
+            z-index: 999999;
           }
         `;
 
