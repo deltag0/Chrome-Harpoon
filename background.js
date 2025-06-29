@@ -388,13 +388,10 @@ function removeFromPinnedPages(tabId) {
 
 
 /*
-    * @ tabId - tabId
-    *   {int}
-    * Function to remove tab from TabState.pinnedPages after it was deleted
+    *
+    * NOTE: modifies JumpList
     */
-chrome.tabs.onRemoved.addListener(async tabId => {
-    console.log("Removed: ", tabId);
-    await TabState.modifyTabState(removeFromPinnedPages, tabId);
+function removeFromJumpList(tabId) {
     var i = JumpList.size;
     while (i--) {
         if (JumpList.list[i][0] === tabId) {
@@ -402,8 +399,18 @@ chrome.tabs.onRemoved.addListener(async tabId => {
             JumpList.size--;
         }
     }
+}
 
-    await JumpList.syncStorage();
+
+/*
+    * @ tabId - tabId
+    *   {int}
+    * Function to remove tab from TabState.pinnedPages after it was deleted
+    */
+chrome.tabs.onRemoved.addListener(async tabId => {
+    console.log("Removed: ", tabId);
+    await TabState.modifyTabState(removeFromPinnedPages, tabId);
+    await JumpList.modifyJumpList(removeFromJumpList, tabId);
 });
 
 
@@ -445,7 +452,7 @@ function reinjectContentScriptsToAllTabs() {
             if (!tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
                 chrome.scripting.executeScript({
                     target: { tabId: tab.id },
-                    files: ['./content-script.js']
+                    files: ["DomUtils.js", "ui.js", "content-script.js"]
                 });
             }
         }
@@ -468,4 +475,9 @@ chrome.runtime.onInstalled.addListener(details => {
     JumpList.reset();
     TabState.reset();
     reinjectContentScriptsToAllTabs();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+    JumpList.reset();
+    TabState.reset();
 });
