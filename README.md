@@ -37,6 +37,7 @@ Install directly from the Chrome Web Store:
 
 | Key          | Action                                  |
 |--------------|------------------------------------------|
+| `Esc`        | Exit the UI                              |
 | `j`          | Move selection down                      |
 | `k`          | Move selection up                        |
 | `Enter`      | Switch to the selected marked tab        |
@@ -53,6 +54,6 @@ Install directly from the Chrome Web Store:
 To run locally:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Chrome-Harpoon.git
+git clone https://github.com/deltag0/Chrome-Harpoon.git
 cd Chrome-Harpoon
 # Load the folder as an unpacked extension in Chrome
