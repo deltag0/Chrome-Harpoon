@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harpoon Help</title>
+    <script type="module" src="../helper_iframe.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: #FAFAFA;
+            color: #333;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #007ACC;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 6px 8px;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        code {
+            background-color: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔖 Harpoon Extension – Keyboard Shortcuts</h1>
+
+    <table>
+        <tr>
+            <th>Shortcut</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><code>Alt + A</code></td>
+            <td>Mark/Pin the current tab</td>
+        </tr>
+        <tr>
+            <td><code>Alt + 0–9</code></td>
+            <td>Switch to a marked tab (1 is the first marked tab, 0 is the last)</td>
+        </tr>
+        <tr>
+            <td><code>Alt + Z</code></td>
+            <td>Go back to the previously selected tab</td>
+        </tr>
+        <tr>
+            <td><code>Alt + Y</code></td>
+            <td>Undo a tab switch (similar to Ctrl + Y in text editors)</td>
+        </tr>
+        <tr>
+            <td><code>Alt + W</code></td>
+            <td>Open the pinned tabs UI (iframe view)</td>
+        </tr>
+    </table>
+
+    <h2>In the UI (iframe)</h2>
+    <table>
+        <tr>
+            <th>Key</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><code>Esc</code></td>
+            <td>Exit the UI</td>
+        </tr>
+        <tr>
+            <td><code>j</code></td>
+            <td>Move selection down</td>
+        </tr>
+        <tr>
+            <td><code>k</code></td>
+            <td>Move selection up</td>
+        </tr>
+        <tr>
+            <td><code>Enter</code></td>
+            <td>Switch to the selected marked tab</td>
+        </tr>
+        <tr>
+            <td><code>x</code></td>
+            <td>Remove/delete the selected marked tab</td>
+        </tr>
+        <tr>
+            <td><code>0–9</code></td>
+            <td>Switch directly to the corresponding mark</td>
+        </tr>
+    </table>
+</body>
+
+</html>

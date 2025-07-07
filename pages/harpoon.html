@@ -11,103 +11,96 @@
         *::before,
         *::after {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         html,
         body {
+            width: 100%;
             height: 100%;
-            margin: 0;
-            padding: 0;
+            background-color: #FAFAFA;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            color: #333;
             overflow: hidden;
-            background: rgba(24, 24, 24, 0.5);
-            font-family: monospace;
-            color: #ddd;
         }
 
         body {
-            padding: 8px;
+            padding: 10px;
         }
 
         #frame-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            padding: 8px;
             display: flex;
             flex-direction: column;
-            border-left: 2px solid #61afef;
-            border-right: 2px solid #61afef;
-            border-bottom: 2px solid #61afef;
-            background: rgba(24, 24, 24, 0.5);
-        }
-
-        #frame-container::before,
-        #frame-container::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            height: 0;
-            border-top: 2px solid #61afef;
-        }
-
-        #frame-container::before {
-            left: 0;
-            width: 12px;
-        }
-
-        #frame-container::after {
-            left: calc(12px + 19.5ch);
-            right: 0;
+            height: 100%;
+            padding: 12px;
+            border: 1px solid #DDD;
+            border-radius: 8px;
+            background-color: #FFFFFF;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
 
         .harpoon-title {
             position: absolute;
-            top: -9px;
-            left: 12px;
-            font-size: 12px;
-            color: #61afef;
-            font-weight: bold;
-            font-family: monospace;
-            letter-spacing: 1px;
+            top: -10px;
+            left: 16px;
+            background-color: #FFFFFF;
+            padding: 0 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #007ACC;
+            border-radius: 4px;
             pointer-events: none;
-            background: transparent;
-            white-space: nowrap;
         }
 
         #pins {
             flex: 1;
+            margin-top: 16px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            padding: 8px;
-            gap: 4px;
-            overflow-y: auto;
+            gap: 6px;
+            padding-right: 4px;
+            overflow: hidden;
         }
 
         .harpoon-item {
             display: flex;
             align-items: center;
-            padding: 4px 8px;
-            border-radius: 3px;
-            background: transparent;
+            padding: 4px 12px;
+            border-radius: 6px;
+            background-color: #F5F5F5;
             cursor: pointer;
+            transition: background-color 0.2s;
             user-select: none;
-            transition: background 0.2s;
         }
 
         .harpoon-item:hover {
-            background: #333;
+            background-color: #E0E0E0;
         }
 
-        .harpoon-item.active {
-            background: rgba(255, 255, 255, 0.07);
+        .harpoon-key.selected {
+            background-color: #27ae60;
             color: white;
         }
 
+        .harpoon-item.active {
+            background-color: #D0E7FF !important;
+            color: #000;
+        }
+
         .harpoon-key {
-            color: #888;
-            margin-right: 8px;
-            width: 24px;
+            background-color: #ccc;
+            color: black;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 2px 6px;
+            display: inline-block;
             text-align: center;
+            min-width: 20px;
+            text-align: center;
+            margin-right: 10px;
         }
 
         .harpoon-label {
@@ -116,13 +109,27 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        .instructions {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 12px;
+            color: #888;
+            pointer-events: none;
+        }
     </style>
 </head>
 
 <body>
     <div id="frame-container">
-        <div class="harpoon-title"> Chrome Harpoon </div>
+        <div class="harpoon-title">Chrome Harpoon</div>
         <div id="pins"></div>
+        <div class="instructions">
+            j/k to move down/up |
+            x to delete |
+            1–9 to jump to tab
+        </div>
     </div>
 </body>
 

@@ -5,7 +5,16 @@
     <meta charset="UTF-8" />
     <title>Pinned Tabs</title>
     <style>
-        /* Minimalist table styling */
+        .active {
+            background-color: #27ae60;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 2px 6px;
+            display: inline-block;
+            text-align: center;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 10px;
@@ -28,6 +37,19 @@
         th:nth-child(1),
         td:nth-child(1) {
             width: 25%;
+        }
+
+        th:nth-child(1) .th-flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        td:nth-child(1) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         th:nth-child(3),

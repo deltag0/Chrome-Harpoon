@@ -91,6 +91,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         link.rel = "noopener";
                         urlCell.appendChild(link);
                         urlCell.classList.remove("empty");
+
+                        chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+                            if (tabs[0].id === tabId) {
+                                keyCell.classList.add("active");
+                            }
+                        });
                     }
                 });
             }

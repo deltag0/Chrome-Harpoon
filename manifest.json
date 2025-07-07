@@ -25,7 +25,8 @@
   {
     "resources": ["/assets/banner.png",
 		  "installation/install.html",
-		  "/pages/harpoon.html"],
+		  "/pages/harpoon.html",
+		  "/pages/help.html"],
     "matches": ["<all_urls>"]
   }
 ],

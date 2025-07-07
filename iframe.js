@@ -21,11 +21,14 @@ async function activate() {
 
         ui.pinnedPages.forEach((tabId, idx) => {
             const item = document.createElement('div');
-            item.className = 'harpoon-item' + (idx === 0 ? ' active' : '');
+            item.className = 'harpoon-item';
+            if (idx === 0) {
+                item.classList.add("active");
+            }
 
             const keySpan = document.createElement('span');
             keySpan.className = 'harpoon-key';
-            keySpan.textContent = `[${(idx + 1) % 10}]`;
+            keySpan.textContent = `${(idx + 1) % 10}`;
             item.appendChild(keySpan);
 
             const label = document.createElement('span');
@@ -38,6 +41,12 @@ async function activate() {
                     } else {
                         label.textContent = tab.title.substring(0, 20) + (tab.title.length > 18 ? "..." : "") || "(no title)";
                         label.classList.remove("empty");
+
+                        chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+                            if (tabs[0].id === tabId) {
+                                keySpan.classList.add("selected");
+                            }
+                        });
                     }
 
                 });
@@ -80,17 +89,17 @@ class HarpoonUI {
         if (event.key === "j") {
             var labels = document.querySelectorAll(".harpoon-item");
             const tab = labels[this.currTab];
-            tab.className = 'harpoon-item';
+            tab.classList.remove("active");
             this.currTab = (this.currTab + 1) % 10;
             const newCurr = labels[this.currTab];
-            newCurr.className = 'harpoon-item' + ' active';
+            newCurr.classList.add("active");
         } else if (event.key === "k") {
             var labels = document.querySelectorAll(".harpoon-item");
             const tab = labels[this.currTab];
-            tab.className = 'harpoon-item';
+            tab.classList.remove("active");
             this.currTab = this.currTab === 0 ? labels.length - 1 : this.currTab - 1;
             const newCurr = labels[this.currTab];
-            newCurr.className = 'harpoon-item' + ' active';
+            newCurr.classList.add("active");
         } else if (event.key === "x") {
             var labels = document.querySelectorAll(".harpoon-label");
             const tab = labels[this.currTab];

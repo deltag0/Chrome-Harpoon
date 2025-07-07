@@ -13,6 +13,9 @@ class UIComponent {
 
         const styleSheet = document.createElement("style");
         styleSheet.type = "text/css";
+
+        const height = className === "help-frame" ? 550 : 420;
+
         // Default to everything hidden while the stylesheet loads.
         styleSheet.innerHTML = `
           iframe {
@@ -22,7 +25,7 @@ class UIComponent {
             left: 50%;
             transform: translate(-50%, -50%);
             width: 600px;
-            height: 300px;
+            height: ${height}px;
             border: none;
             z-index: 999999;
           }

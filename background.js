@@ -22,19 +22,19 @@ const TabState = {
             }
         })
     },
-    reset() {
+    async reset() {
         for (let i = 0; i < 10; i++) {
             this.pinnedPages[i] = -1;
         }
         this.pinnedPagesLen = 0;
-        this.syncStorage();
+        await this.syncStorage();
     },
     /* On any change to the TabState struct, this callback must be used to sync, the
     * TabState with the local storage
     */
     async modifyTabState(callback, ...args) {
         await callback(...args);
-        await TabState.syncStorage();
+        await this.syncStorage();
     }
 };
 
@@ -75,16 +75,16 @@ const JumpList = {
             }
         });
     },
-    reset() {
+    async reset() {
         this.maxSize = 100;
         size = 0;
         this.currIdx = -1;
         this.list = [];
-        this.syncStorage();
+        await this.syncStorage();
     },
     async modifyJumpList(callback, ...args) {
         await callback(...args);
-        await JumpList.syncStorage();
+        await this.syncStorage();
     }
 };
 

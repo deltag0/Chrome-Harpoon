@@ -32,13 +32,43 @@ const Harpoon = {
     }
 }
 
+const Help = {
+    helpUI: null,
+
+    init() {
+        if (!this.helpUI) {
+            this.helpUI = new UIComponent();
+            console.log("hello");
+            this.helpUI.load("pages/help.html", "help-frame");
+        }
+    },
+
+    activate() {
+        this.init();
+        this.helpUI.show(
+            { name: "activate" },
+            { focus: true },
+        );
+    },
+
+    hide() {
+        this.init();
+        this.helpUI.postMessage({ name: "hide" });
+    }
+
+}
+
 
 var harpoon = null;
+var help = null;
 
 
 document.addEventListener("click", event => {
     if (harpoon) {
         harpoon.hide();
+    }
+    if (help) {
+        help.hide();
     }
 });
 
@@ -139,6 +169,12 @@ document.addEventListener("keydown", event => {
                 harpoon.activate();
             }
             pressed_keys["w"] = false;
+        } else if (pressed_keys["/"]) {
+            if (!help) {
+                help = Help;
+            }
+            help.activate();
+            pressed_keys["/"] = false;
         }
         else {
             for (let i = 0; i < 10; i++) {
