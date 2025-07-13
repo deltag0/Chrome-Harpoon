@@ -102,4 +102,21 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+    const checkBox = document.getElementById("autoPinCheckbox");
+    chrome.runtime.sendMessage({ type: "GET_AUTOPIN" }, (response) => {
+        console.log(response);
+        if (!response) {
+            console.error("No pinned pages returned");
+            return;
+        }
+        const enabled = response.enabled;
+        console.log(enabled);
+        checkBox.checked = enabled;
+    });
+    checkBox.addEventListener("change", () => {
+        const enabled = checkBox.checked;
+
+        chrome.runtime.sendMessage({ type: "UPDATE_AUTOPIN", enabled: enabled });
+    });
+
 });

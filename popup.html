@@ -106,17 +106,46 @@
         button:hover svg {
             stroke: white;
         }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        #autoPinCheckbox {
+            accent-color: #007bff;
+            width: 12px;
+            height: 12px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
 <body>
-    <h3>Pinned Tabs</h3>
+    <div class="header-row">
+        <h3 style="margin: 0;">Pinned Tabs</h3>
+        <label class="checkbox-container" for="autoPinCheckbox">
+            <input type="checkbox" id="autoPinCheckbox" />
+            Enable Auto-Pinning
+        </label>
+    </div>
+
     <table id="pinnedTable">
         <thead>
             <tr>
                 <th>Key</th>
                 <th>URL</th>
-                <th>Actions</th> <!-- new column header -->
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>

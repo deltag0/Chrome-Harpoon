@@ -12,6 +12,9 @@ export async function registerPortWithOwnerPage(event) {
 }
 
 export function init() {
+    // Listener gets triggered when we send a message through the 
+    // actual page we loaded (iframElement). The messages from the API let
+    // you pass a port, so that's why we do it this way
     globalThis.addEventListener("message", registerPortWithOwnerPage);
 }
 

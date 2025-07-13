@@ -1,5 +1,6 @@
 const TabState = {
     pinnedPages: Array(10).fill(-1),
+    autoPin: false,
     pinnedPagesLen: 0,
 
     async load() {
@@ -7,6 +8,7 @@ const TabState = {
         if (data.TabState) {
             const saved = data.TabState;
             this.pinnedPagesLen = saved.pinnedPagesLen;
+            this.autoPin = saved.autoPin;
             for (let i = 0; i < saved.pinnedPages.length; i++) {
                 this.pinnedPages[i] = saved.pinnedPages[i];
             }
@@ -18,6 +20,7 @@ const TabState = {
         return chrome.storage.local.set({
             TabState: {
                 pinnedPages: this.pinnedPages,
+                autoPin: this.autoPin,
                 pinnedPagesLen: this.pinnedPagesLen,
             }
         })
@@ -27,12 +30,53 @@ const TabState = {
             this.pinnedPages[i] = -1;
         }
         this.pinnedPagesLen = 0;
+        this.autoPin = false;
         await this.syncStorage();
     },
     /* On any change to the TabState struct, this callback must be used to sync, the
     * TabState with the local storage
     */
     async modifyTabState(callback, ...args) {
+        await callback(...args);
+        await this.syncStorage();
+    }
+};
+
+const ProfileState = {
+    savedURLs: Array.from({ length: 10 }, () => Array(10).fill("")),
+
+    async load() {
+        const data = await chrome.storage.local.get("ProfileState");
+        if (data.ProfileState) {
+            const saved = data.ProfileState;
+            for (let i = 0; i < 10; i++) {
+                for (let j = 0; j < 10; j++) {
+                    this.savedURLs[i][j] = saved.savedURLs[i][j];
+                }
+            }
+        }
+    },
+
+    async syncStorage() {
+        // NOTE: No clue why, but this doesn't work without getting first line :/
+        await chrome.storage.local.get("ProfileState");
+        await chrome.storage.local.set({
+            ProfileState: {
+                savedURLs: JSON.parse(JSON.stringify(this.savedURLs)),
+            }
+        });
+    },
+
+    async reset() {
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < 10; j++) {
+                this.savedURLs[i][j] = "";
+            }
+        }
+        await this.syncStorage();
+    },
+
+    async modifyProfileState(callback, ...args) {
         await callback(...args);
         await this.syncStorage();
     }
@@ -75,6 +119,7 @@ const JumpList = {
             }
         });
     },
+
     async reset() {
         this.maxSize = 100;
         size = 0;
@@ -88,9 +133,16 @@ const JumpList = {
     }
 };
 
+chrome.runtime.onStartup.addListener(async () => {
+    JumpList.reset();
+    TabState.reset();
+    await ProfileState.load();
+});
+
 (async () => {
-    await JumpList.load();
     await TabState.load();
+    await JumpList.load();
+    await ProfileState.load();
 })();
 
 
@@ -210,6 +262,52 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 
 /*
+    *
+    *
+    * NOTE: Modifies ProfileState
+    */
+function addToProfiles(i) {
+    console.log("Added profile, ", i);
+    urls = ProfileState.savedURLs[i];
+    TabState.pinnedPages.forEach((tabId, i) => {
+        if (tabId !== -1) {
+            chrome.tabs.get(tabId, tab => {
+                urls[i] = tab.url;
+            });
+        } else {
+            urls[i] = "";
+        }
+    });
+}
+
+
+async function loadProfile(i) {
+    const urls = ProfileState.savedURLs[i];
+    for (let j = 0; j < urls.length; j++) {
+        const url = urls[j];
+        if (url === "") continue;
+
+        await new Promise(resolve => {
+            chrome.tabs.create({ url }, () => resolve());
+        });
+
+        chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
+            const tabId = tabs[0].id;
+            await TabState.modifyTabState((tabId, idx) => {
+                TabState.pinnedPages[idx] = tabId
+                chrome.action.setIcon({
+                    tabId,
+                    path: {
+                        "128": "./assets/icon_activated.png",
+                    }
+                });
+            }, tabId, j);
+        });
+    }
+}
+
+
+/*
     * swapTabs - Swap visible tab of user to requested tab if possible
     * @tabState: Constant reference to TabState
     *   {TabState}
@@ -222,7 +320,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     */
 async function swapTab(tabState, idx) {
     Object.freeze(tabState);
-    if (idx === 0 && tabState.pinnedPages.length === 10) {
+    if (idx === 0) {
         let tabId = tabState.pinnedPages[9];
 
         if (tabId === -1) {
@@ -239,7 +337,7 @@ async function swapTab(tabState, idx) {
 
         tabState.pinnedPages[9]
         setActive(tab.id, tab.windowId);
-    } else if (tabState.pinnedPages.length >= idx) {
+    } else {
         let tabId = tabState.pinnedPages[idx - 1];
 
         if (tabId === -1) {
@@ -267,10 +365,6 @@ async function swapTab(tabState, idx) {
     * "add":
     *   Pin the last active tab if less than 10 tabs are currently pinned,
     *   and the tab requested to be pinned is not already in the TabState.pinnedPages array.
-    * 
-    * "check":
-    *  Display all pinned pages to the user.
-    *
     * 0-9:
     *   Any integer from 0-9 will switch to the corresponding tab (0 would be the tenth tab)
     *   if it exists.
@@ -278,6 +372,10 @@ async function swapTab(tabState, idx) {
     *   Move forward in the jump list if possible
     * "back":
     *   Move backwards in the jump list if possible
+    * "addProfile":
+    *   Saved a profile to the specified index in the message
+    * "loadProfile":
+    *   Load a profile from the specified index in the message
     */
 async function handleTabCommands(message, port) {
     let ret = 0;
@@ -289,8 +387,6 @@ async function handleTabCommands(message, port) {
             var lastTab = tabs[0];
             await TabState.modifyTabState(addToPinned, lastTab.id);
         });
-    } else if (message.message === "check") {
-        console.log("Checking all pinned pages");
     } else if (message.message >= 0 && message.message <= 9) {
         console.log("Swapping");
         ret = await swapTab(TabState, message.message);
@@ -299,6 +395,10 @@ async function handleTabCommands(message, port) {
         await JumpList.modifyJumpList(moveForwardJumpList);
     } else if (message.message === "back") {
         await JumpList.modifyJumpList(moveBackJumpList);
+    } else if (message.message === "addProfile") {
+        await ProfileState.modifyProfileState(addToProfiles, message.index);
+    } else if (message.message === "loadProfile") {
+        await loadProfile(message.index);
     }
 
     console.log(ret);
@@ -318,10 +418,6 @@ async function handleTabCommands(message, port) {
     * Listener for messages on a port
     */
 chrome.runtime.onConnect.addListener(function(port) {
-    if (port.name === "dummy") { // message just to keep the service worker from going inactive
-        return;
-    }
-
     if (port.name === "tabs") {
         port.onMessage.addListener(msg => handleTabCommands(msg, port));
     }
@@ -349,6 +445,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     } else if (request.type === "MOVE_TO_PINNED_PAGE") { // The index relative to the pinned number
         var idx = request.index;
         swapTab(TabState, idx);
+    } else if (request.type === "UPDATE_AUTOPIN") {
+        const enabled = request.enabled;
+        TabState.modifyTabState((enabled) => { TabState.autoPin = enabled; }, enabled);
+    } else if (request.type === "GET_AUTOPIN") {
+        sendResponse({ enabled: TabState.autoPin });
     }
 });
 
@@ -428,8 +529,10 @@ async function changedTab(activeInfo) {
         blockNextTab = false;
         return;
     }
+    if (TabState.autoPin) {
+        addToPinned(activeInfo.tabId);
+    }
 
-    console.log("Added tab", activeInfo.tabId);
     let tabId = activeInfo.tabId
     await JumpList.modifyJumpList(addToJumpList, tabId, activeInfo.windowId);
 }
@@ -474,10 +577,7 @@ chrome.runtime.onInstalled.addListener(details => {
     }
     JumpList.reset();
     TabState.reset();
+    ProfileState.reset();
     reinjectContentScriptsToAllTabs();
 });
 
-chrome.runtime.onStartup.addListener(() => {
-    JumpList.reset();
-    TabState.reset();
-});

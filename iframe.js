@@ -102,7 +102,12 @@ class HarpoonUI {
             newCurr.classList.add("active");
         } else if (event.key === "x") {
             var labels = document.querySelectorAll(".harpoon-label");
+            var keys = document.querySelectorAll(".harpoon-key");
+
             const tab = labels[this.currTab];
+            const key = keys[this.currTab];
+
+            key.classList.remove("selected");
             tab.classList.add("empty");
             tab.innerHTML = "(empty)";
             chrome.runtime.sendMessage({

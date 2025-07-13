@@ -1,5 +1,6 @@
 // Dictionary of the form: {string, bool} indicating if a key is pressed
 const pressed_keys = {};
+const tracked_keys = new Set();
 // TODO: const leader = " ";
 
 
@@ -94,26 +95,6 @@ const sendRequest = (messageParam, port) => {
 
 
 /**
-    * Sends a message on a port named "dummy" so that the service worker doesn't go inactive.
-    */
-function sendDummyMessage() {
-    try {
-        var port = chrome.runtime.connect({ name: "dummy" });
-        sendRequest("dummy", port);
-    } catch (err) {
-        return;
-    }
-}
-
-
-/*
-    * Send a dummy message every 29seconds since the server worker goes inactive
-    * for some unknown reason. Cannot find a reason why.
-    */
-setInterval(sendDummyMessage, 29000);
-
-
-/**
     * Add key to pressed_keys.
     *
     * Outside of adding the pressed key, this listener checks if any combination of keys
@@ -141,12 +122,14 @@ document.addEventListener("keydown", event => {
 
     pressed_keys[event.key] = true;
 
+
     if (event.altKey) {
         try {
             var port = chrome.runtime.connect({ name: "tabs" });
         } catch (err) {
             return;
         }
+
         if (pressed_keys["a"]) {
             sendRequest("add", port);
         } else if (pressed_keys["z"]) {
@@ -181,6 +164,11 @@ document.addEventListener("keydown", event => {
                 if (pressed_keys[i.toString()]) {
                     sendRequest(i, port);
                     pressed_keys[i] = false;
+
+                    if (tracked_keys.has("s")) {
+                        console.log("did it");
+                        port.postMessage({ message: "addProfile", index: i });
+                    }
                     break;
                 }
             }
@@ -190,5 +178,29 @@ document.addEventListener("keydown", event => {
                 console.log("Error occured while processing input")
             }
         });
+    } else if (event.shiftKey) {
+        try {
+            var port = chrome.runtime.connect({ name: "tabs" });
+        } catch (err) {
+            return;
+        }
+        for (let i = 0; i < 10; i++) {
+            if (event.code == `Digit${i}`) {
+                if (tracked_keys.has("s")) {
+                    port.postMessage({ message: "addProfile", index: i });
+                    tracked_keys.clear();
+                } else {
+                    port.postMessage({ message: "loadProfile", index: i });
+                    pressed_keys[event.key] = false;
+                }
+                break;
+            }
+        }
+    } else {
+        tracked_keys.clear();
+    }
+
+    if (event.key == "s") {
+        tracked_keys.add("s");
     }
 });
